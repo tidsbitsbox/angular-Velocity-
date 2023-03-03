@@ -1,0 +1,215 @@
+<!DOCTYPE>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>tips</title>
+<style type="text/css">
+
+</style>
+
+
+
+</head>
+
+<body>
+<canvas  id="canvas" width=600px; height=600px style="border: solid 1px #666"></canvas>
+<div id=count>sdh</div>
+
+</body>
+<script src="vector.js"></script>
+<script>
+var ctx = document.getElementById('canvas').getContext('2d');
+
+
+
+var Attractor = function(){
+var width=600;
+var height=600;
+this.position=new Vector(width/2,height/2);
+this.mass = 20;
+this.G = 1;
+};
+
+
+
+
+
+Attractor.prototype.calculateAttraction=function(v1) {
+    // Calculate direction of force
+var force =this.position.subtract(v1.position);
+	
+    // Distance between objects       
+var distance = force.getMagnitude();
+document.getElementById('count').innerHTML=distance;
+//
+    // Limiting the distance to eliminate "extreme" results for very close or very far objects                            
+if(distance>30){distance=30;}
+if(distance<5){distance=5;}
+    // Normalize vector (distance doesn't matter here, we just want this vector for direction)                                  
+var f=force.normalize();
+ //
+    // Calculate gravitional force magnitude  
+var strength = (this.G * this.mass * v1.mass) / (distance * distance);
+
+document.getElementById('count').innerHTML=strength;
+    // Get force vector --> magnitude * direction
+f.multiplyBy(strength);
+//;	
+   return f;
+  
+};
+
+
+
+
+Attractor.prototype.display=function() {
+    
+//ctx.moveTo(300,300);
+ctx.beginPath();
+	ctx.arc(300, 300, 20, 0, Math.PI * 2, true);
+	ctx.stroke(); 
+ctx.closePath();
+};
+
+
+
+var Mover = function(m, x, y) {
+    this.position = new Vector(x, y);
+    this.mass = m;
+    
+    this.angle = 0;
+    this.aVelocity = 0;
+    this.aAcceleration = 0;
+    
+    this.velocity = new Vector(Math.random()-0.5, Math.random()-0.5);
+    this.acceleration = new Vector(0, 0);
+	
+};
+
+
+
+
+
+Mover.prototype.applyForce = function(force) {
+    var f = force.divide(this.mass);
+   
+   this.acceleration.addTo(f);
+
+};
+
+
+Mover.prototype.update = function () {
+    this.velocity.addTo(this.acceleration);
+    this.position.addTo(this.velocity);
+    this.aAcceleration = this.acceleration.x*5;
+    this.aVelocity += this.aAcceleration;
+    //if(this.aVelocity>5){this.aVelocity=5};
+    this.angle += this.aVelocity;
+    
+   this.acceleration.multiplyBy(0);
+
+	 
+};
+
+Mover.prototype.displayIt = function () {
+
+
+
+    ctx.save();
+    ctx.translate(this.position.x,this.position.y);
+    ctx.rotate(this.angle*Math.PI/180);//
+    ctx.beginPath();
+ctx.rect(-this.mass*16/2,-this.mass*16/2, this.mass*16, this.mass*16);
+ctx.stroke();
+ctx.closePath();
+ctx.restore();
+
+
+};
+
+//var m=new Mover(10,100,100);
+
+
+
+
+
+
+var attr=new Attractor();
+
+var movers = [];
+
+
+for (var i = 0; i < 40; i++) {
+    movers.push(new Mover(Math.random()*2, Math.random()*300+150, Math.random()*300+150));
+}
+
+function drawIt() {
+ctx.clearRect(0,0,600,600);
+attr.display();
+
+  for (var i=0;i<movers.length; i++) {
+    var force = attr.calculateAttraction(movers[i]);
+	
+    movers[i].applyForce(force);
+
+    movers[i].update();
+    movers[i].displayIt();
+	 
+  }
+
+  window.requestAnimationFrame(drawIt);
+};
+window.requestAnimationFrame(drawIt);
+/*
+/*
+*/
+
+/* 
+var ang = 0;
+var aVelocity = 0;
+var aAcceleration = 0.0009;
+ctx.beginPath();
+ctx.moveTo(0, 0);
+ctx.lineTo(160, 160);
+
+
+    
+    
+	//ctx.ellipse(160, 160, 40, 60, Math.PI / 8, 0, 2 * Math.PI);
+	ctx.arc(160, 160, 20, 0, Math.PI * 2, true);
+	ctx.stroke(); 
+	ctx.closePath();
+    //ctx.fill();
+
+var draw = function() {
+var width=300;
+var height=300;
+ctx.clearRect(0,0,600,600);
+	ctx.save();
+	ctx.clearRect(0,0,600,600);
+
+   ctx.translate(width, height);
+    ctx.rotate(ang*Math.PI/180);
+    ctx.strokeStyle = 'black';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+    ctx.beginPath();
+  	ctx.moveTo(60, 0);
+   	
+    
+    ctx.lineTo(60, 0);
+	//ctx.ellipse(160, 0, 20, 20, Math.PI /2, 0,  2*Math.PI);
+	ctx.arc(160, 0, 20, 0, Math.PI * 2, true);
+	ctx.arc(-160, 0, 20, 0, Math.PI * 2, true);
+	ctx.closePath();
+    ctx.fill();
+    ang += aVelocity;
+    aVelocity += aAcceleration;
+	ctx.restore();
+	window.requestAnimationFrame(draw);
+};
+
+window.requestAnimationFrame(draw);
+*/
+</script>
+</html>
